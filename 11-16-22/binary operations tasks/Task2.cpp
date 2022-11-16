@@ -13,7 +13,7 @@ int main()
     while (n != 0)
     {
         int remainder = n % 2;
-        binaryNumber[numberLength] = char(remainder);
+        binaryNumber[numberLength] = remainder;
         n /= 2;
         numberLength++;
     }
