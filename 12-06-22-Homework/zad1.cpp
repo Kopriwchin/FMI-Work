@@ -39,8 +39,13 @@ int* decimalToBinary(unsigned n)
 
 bool hasAlternatingBits(unsigned n)
 {
+	if (n >= 0 && n <= 2)
+	{
+		return true;
+	}
+
 	int* binaryNum = decimalToBinary(n);
-	
+
 	for (int i = 0; i < digitsNumber(binaryNum) - 1; i++)
 	{
 		if (binaryNum[i] == binaryNum[i + 1])
@@ -59,9 +64,14 @@ int main()
 	int input;
 	cin >> input;
 
-	bool result = hasAlternatingBits(input);
+	if (!cin || input < 0 || input > 255)
+	{
+		return -1;
+	}
 
-	if (result)
+	bool output = hasAlternatingBits(input);
+
+	if (output)
 	{
 		cout << "true";
 	}
