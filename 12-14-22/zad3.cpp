@@ -1,7 +1,7 @@
 #include <iostream>
 using std::cout;
 
-char* stringWithoutNumbers(char* str, int size)
+char* StringWithoutNumbers(char* str, int size)
 {
 	int newSize = 0;
 	int* indexes = new int[size];
@@ -22,7 +22,8 @@ char* stringWithoutNumbers(char* str, int size)
 	{
 		newStr[i] = str[indexes[i]];
 	}
-
+	
+	delete[] indexes;
 	return newStr;
 }
 
