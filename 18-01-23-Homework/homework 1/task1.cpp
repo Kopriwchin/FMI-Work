@@ -1,7 +1,10 @@
 #include <iostream>
+#include <string>
+
 using std::cin;
 using std::cout;
 using std::endl;
+using std::string;
 
 char* Encrypt(unsigned int key, const char* message)
 {
@@ -28,6 +31,7 @@ char* Encrypt(unsigned int key, const char* message)
 		if (startIndex > message[i] || message[i] > endIndex)
 		{
 			cout << "Message contains an unacceptable character. Only capital letters allowed!";
+			delete[] encryptedMessage;
 			exit(-1);
 		}
 
@@ -53,15 +57,38 @@ char* Decrypt(unsigned int key, const char* message)
 
 int main()
 {
-	// Test example of the program
-	char toBeEncrypted[] = "THIS IS AN EXAMPLE MESSAGE TO BE ENCRYPTED";
-	char toBeDecrypted[] = "MYWLYN NYRN NI VY XYWLSJNYX";
+	string option;
 
-	cout << Encrypt(12, toBeEncrypted);
-	cout << endl;
+	cin >> option;
 
-	cout << Decrypt(20, toBeDecrypted);
-	cout << endl;
+	int key;
+
+	if (!(cin >> key))
+	{
+		cout << -1;
+		return -1;
+	}
+
+	string message;
+
+	std::cin.ignore();
+	std::getline(cin, message);
+
+	const char* messageAsArr = message.c_str();
+	
+	if (option == "encrypt")
+	{
+		cout << Encrypt(key, messageAsArr);
+	}
+	else if (option == "decrypt")
+	{
+		cout << Decrypt(key, messageAsArr);
+	}
+	else
+	{
+		cout << -1;
+		return -1;
+	}
 
 	return 0;
 }
