@@ -91,19 +91,56 @@ string* Encode(string message)
     return morseMessage;
 }
 
+char ReturnSymbol(string morse)
+{
+    string englishLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,.?/";
+
+    string lettersMorse[42] = { ".-", "-...", "-.-.", "-..", ".", "..-.","--.", "....",
+        "..", ".---", "-.-", ".-..", "--", "-.", "---", ".--.",
+        "--.-", ".-.", "...", "-", "..-", "...-", ".--", "-..-",
+        "-.--", "--..", "-----", ".----","..---","...--", "....-",
+        ".....","-....","--...","---..","----.",  "--..--", ".-.-.-", "..--..", "-..-.", ".--.-."};
+    
+
+    for (size_t i = 0; i < 42; i++)
+    {
+        if (morse == lettersMorse[i])
+        {
+            return englishLetters[i];
+        }
+    }
+}
+
 string Decode(string code)
 {
-    string morseCodeAlphabet[] = { ".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....",
-         "..", ".---", "-.-", ".-..", "--", "-.", "---", ".--.",
-         "--.-", ".-.", "...", "-", "..-", "...-", ".--", "-..-",
-         "-.--", "--.." };
-    
-    string numbersMorse[] = { "-----", ".----","..---","...--", "....-",".....","-....","--...","---..","----." };
-
+    // Another way (could've used the same method in Encode)
+    int spacesCount = 0;
     for (size_t i = 0; i < code.length(); i++)
     {
-
+        if (code[i] = ' ')
+        {
+            spacesCount++;
+        }
     }
+
+    char* finalMessage = new char[100];
+
+    for (size_t i = 0; i < spacesCount; i++)
+    {
+        string initWord = "";
+
+        for (size_t j = 0; j < 6; j++)
+        {
+            initWord += ReturnSymbol(code[i]);
+            if (code[i] == ' ')
+            {
+                
+            }
+            
+        }
+    }
+
+    return code;
 }
 
 int main()
@@ -127,7 +164,7 @@ int main()
 
         delete[] morseCode;
     }
-    /*else
+    else
     {
         string* morseCode = Decode(message);
 
@@ -138,7 +175,7 @@ int main()
 
         delete[] morseCode;
     }
-    */
+    
 
     return 0;
 }
