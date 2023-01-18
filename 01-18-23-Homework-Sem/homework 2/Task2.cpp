@@ -29,29 +29,29 @@ string OtherSymbols(char symbol)
 {
     switch (symbol)
     {
-        case '.':
-            return ".-.-.-";
-            break;
+    case '.':
+        return ".-.-.-";
+        break;
 
-        case ',':
-            return "--..--";
-            break;
+    case ',':
+        return "--..--";
+        break;
 
-        case '?':
-            return "..--..";
-            break;
+    case '?':
+        return "..--..";
+        break;
 
-        case '/':
-            return "-..-.";
-            break;
+    case '/':
+        return "-..-.";
+        break;
 
-        case '@':
-            return ".--.-.";
-            break;
+    case '@':
+        return ".--.-.";
+        break;
 
-        default:
-            return " ";
-            break;
+    default:
+        return " ";
+        break;
     }
 
 
@@ -65,7 +65,7 @@ string* Encode(string message)
     string morseCodeAlphabet[] = { ".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....",
             "..", ".---", "-.-", ".-..", "--", "-.", "---", ".--.",
             "--.-", ".-.", "...", "-", "..-", "...-", ".--", "-..-",
-            "-.--", "--.."};
+            "-.--", "--.." };
 
     // 0 - 9
     string numbersMorse[] = { "-----", ".----","..---","...--", "....-",".....","-....","--...","---..","----." };
@@ -91,25 +91,44 @@ string* Encode(string message)
     return morseMessage;
 }
 
-char ReturnSymbol(string morse)
-{
-    string englishLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,.?/";
-
-    string lettersMorse[42] = { ".-", "-...", "-.-.", "-..", ".", "..-.","--.", "....",
-        "..", ".---", "-.-", ".-..", "--", "-.", "---", ".--.",
-        "--.-", ".-.", "...", "-", "..-", "...-", ".--", "-..-",
-        "-.--", "--..", "-----", ".----","..---","...--", "....-",
-        ".....","-....","--...","---..","----.",  "--..--", ".-.-.-", "..--..", "-..-.", ".--.-."};
-    
-
-    for (size_t i = 0; i < 42; i++)
-    {
-        if (morse == lettersMorse[i])
-        {
-            return englishLetters[i];
-        }
-    }
-}
+//char ReturnSymbol(string morse)
+//{
+//    string englishLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,.?/";
+//
+//    string lettersMorse[42] = { ".-", "-...", "-.-.", "-..", ".", "..-.","--.", "....",
+//        "..", ".---", "-.-", ".-..", "--", "-.", "---", ".--.",
+//        "--.-", ".-.", "...", "-", "..-", "...-", ".--", "-..-",
+//        "-.--", "--..", "-----", ".----","..---","...--", "....-",
+//        ".....","-....","--...","---..","----.",  "--..--", ".-.-.-", "..--..", "-..-.", ".--.-." };
+//
+//
+//    for (size_t i = 0; i < 42; i++)
+//    {
+//        if (morse == lettersMorse[i])
+//        {
+//            return englishLetters[i];
+//        }
+//    }
+//
+//    char* finalMessage = new char[100];
+//
+//    for (size_t i = 0; i < spacesCount; i++)
+//    {
+//        string initWord = "";
+//
+//        for (size_t j = 0; j < 6; j++)
+//        {
+//            initWord += ReturnSymbol(code[i]);
+//            if (code[i] == ' ')
+//            {
+//
+//            }
+//
+//        }
+//    }
+//
+//    return code;
+//}
 
 //string Decode(string code)
 //{
@@ -164,18 +183,18 @@ int main()
 
         delete[] morseCode;
     }
-   /* else
-    {
-        string* morseCode = Decode(message);
+    /* else
+     {
+         string* morseCode = Decode(message);
 
-        for (size_t i = 0; i < message.length(); i++)
-        {
-            cout << morseCode[i];
-        }
+         for (size_t i = 0; i < message.length(); i++)
+         {
+             cout << morseCode[i];
+         }
 
-        delete[] morseCode;
-    }*/
-    
+         delete[] morseCode;
+     }*/
+
 
     return 0;
 }
