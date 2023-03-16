@@ -35,13 +35,12 @@ int main()
 	{
 		char buffer[BUFFER_SIZE];
 		inputFile.getline(buffer, BUFFER_SIZE);
-		
+
 		int i = 0;
-		int j;
 
 		int lineLength = strlen(buffer);
 
-		for (i = lineLength - 1, j = 0; i >= 0; i--, j++)
+		for (i = lineLength - 1; i >= 0; i--)
 		{
 			outputFile << buffer[i];
 		}
