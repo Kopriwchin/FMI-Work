@@ -45,8 +45,7 @@ struct TransactionBlock {
 	Transaction transactions[16];
 };
 
-int AtoI(char* buffer)
-{
+int AtoI(char* buffer) {
 	int result = 0;
 
 	for (int i = 0; buffer[i] != '\0'; i++)
@@ -67,8 +66,7 @@ bool CheckIfFileExists(const char* filePath) {
 	return true;
 }
 
-int InitializeIdFile()
-{
+int InitializeIdFile() {
 	if (CheckIfFileExists(ID_FILE_NAME))
 	{
 		// 10 digits in INT type
@@ -101,8 +99,7 @@ int InitializeIdFile()
 	}
 }
 
-bool IncrementId(int id)
-{
+bool IncrementId(int id) {
 	ofstream idFile(ID_FILE_NAME, ofstream::out | ofstream::trunc);
 
 	if (!idFile.is_open() || !idFile)
@@ -119,13 +116,7 @@ bool IncrementId(int id)
 	return true;
 }
 
-double ExchangeCoins(const double amount) {
-	const double OOPCOIN_EXCHANGE_RATE = 420;
-	return amount * OOPCOIN_EXCHANGE_RATE;
-}
-
-int GetId()
-{
+int GetId() {
 	ifstream idFile(ID_FILE_NAME);
 
 	if (!idFile.is_open() || !idFile)
@@ -147,6 +138,41 @@ int GetId()
 	return idResult;
 }
 
+bool IsTransactionValid(Transaction& transaction) {
+	if (transaction.sender == 0)
+	{
+		return true;
+	}
+
+	/*ifstream usersFile("users.bat", std::ios::binary);
+	while (!usersFile.eof()) {
+		User user = {};
+		usersFile.read((char*)&user.name, sizeof(User));
+	}
+
+	if (transaction.sender.exists)
+	{
+
+	}*/
+
+	//Otherwise check if sender has enough money
+
+	return true;
+}
+
+void AddTransactionToBlock(Transaction& transaction) {
+	if (IsTransactionValid(transaction))
+	{
+		if (true)
+		{
+
+		}
+	}
+	else {
+
+	}
+}
+
 bool CreateUser(const char* username, const double amount) {
 	const unsigned currentUserId = GetId();
 
@@ -158,25 +184,36 @@ bool CreateUser(const char* username, const double amount) {
 	if (!writeFile.is_open() || !writeFile)
 	{
 		cout << INVALID_FILE_MSG << endl;
-		return -1;
+		return false;
 	}
 
 	writeFile.write(reinterpret_cast<const char*>(&user.id), sizeof(int));
 
-	int nameLength = strlen(user.name);
+	size_t nameLength = strlen(user.name);
 
 	writeFile.write(reinterpret_cast<const char*>(&user.name), nameLength);
+	writeFile.write("\n", 1);
 
 	writeFile.close();
 
 	Transaction initTransaction { 0, currentUserId, ExchangeCoins(amount), std::time(nullptr) };
-
+	AddTransactionToBlock(initTransaction);
 	return true;
 }
 
-void AddTransactionToBlock(Transaction& transaction) {
+double GetUserAvailableCoins(unsigned id) {
+	ifstream blocksFile("blocks.dat", std::ios::binary);
 
+	return 0;
 }
+
+//void PrintWealthiestUsers(int resultsCount) {
+//	// TODO
+//	
+//}
+//void PrintBiggestBlocks(int resultsCount) {
+//	// TODO
+//}
 
 void InitializeBlockFile() {
 
@@ -199,6 +236,8 @@ void PrintProgramCommands()
 	cout << "Create user -> 1" << endl;
 	cout << "Remove user -> 2" << endl;
 	cout << "Send coins -> 3" << endl;
+	cout << "Print out wealthiest users -> 4" << endl;
+	cout << "Print out biggest blocks -> 5" << endl << endl;
 	cout << "Enter a command by its number: ";
 }
 
@@ -219,20 +258,24 @@ int main() {
 		switch (chosenCommand)
 		{
 			char username[128];
+			double amount;
+
 			case 1:
 				cout << "Enter username: ";
 				cin >> username;
+				ValidateName(username);
 
 				cout << "Enter amount: ";
-				double amount;
 				cin >> amount;
+				ValidateAmount(amount);
+				cout << amount;
 
 				CreateUser(username, amount);
 				break;
-
 			case 2:
 				cout << "Enter username: ";
 				cin >> username;
+				ValidateName(username);
 
 				// RemoveUser(username);
 				break;
@@ -240,12 +283,27 @@ int main() {
 				cout << "Enter sender's username: ";
 				char senderName[128];
 				cin >> senderName;
+				ValidateName(senderName);
 
 				cout << "Enter receiver's name: ";
 				char receiverName[128];
-				cin >> username;
-
+				cin >> receiverName;
+				ValidateName(receiverName);
+				
 				// SendCoins(senderName, receiverName, amount);
+				break;
+			case 4:
+				cout << "Enter amount of users shown: ";
+				cin >> amount;
+				ValidateAmount(amount);
+				//PrintWealthiestUsers(int amount);
+				break;
+			case 5:
+				cout << "Enter amount of users shown: ";
+				cin >> amount;
+				ValidateAmount(amount);
+				//PrintBiggestBlocks(int amount);
+				break;
 			default:
 				cout << "Invalid command!" << endl;
 				break;
