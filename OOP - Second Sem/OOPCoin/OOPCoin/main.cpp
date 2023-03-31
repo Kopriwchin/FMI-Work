@@ -11,7 +11,6 @@ using std::fstream;
 using std::ifstream;
 using std::ofstream;
 
-
 unsigned computeHash(const unsigned char* memory, int length) {
 	unsigned hash = 0xbeaf;
 
@@ -31,8 +30,6 @@ struct User {
 	unsigned id;
 	char name[128];
 };
-
-User loadedUsers[4];
 
 struct Transaction {
 	unsigned sender;
@@ -146,9 +143,39 @@ unsigned getId() {
 	return idResult;
 }
 
+bool verifyBlocks(unsigned blockId) {
+	ifstream blocksFile("blocks.dat", std::ios::binary);
+
+	int blocksCount = sizeof(blocksFile) / sizeof(TransactionBlock);
+
+	TransactionBlock block;
+	blocksFile.read(reinterpret_cast<char*>(&block), sizeof(TransactionBlock));
+	unsigned initHash = computeHash((const unsigned char*)&block, sizeof(TransactionBlock));
+
+	if (block.id != block.prevBlockId)
+	{
+		return false;
+	}
+
+	/*for (int i = 2; i <= blocksCount; i++)
+	{
+		blocksFile.read(reinterpret_cast<char*>(&block), sizeof(TransactionBlock));
+		unsigned initHash = computeHash((const unsigned char*)&block, sizeof(TransactionBlock));
+
+		if (initHash == ) {
+			return false;
+		}
+
+	}*/
+
+
+	return true;
+}
+
 bool isTransactionValid(Transaction& transaction) {
-	if (transaction.sender == 0) {
-		return true;
+	if ()
+	{
+
 	}
 
 	/*ifstream usersFile("users.bat", std::ios::binary);
@@ -203,6 +230,26 @@ bool createUser(const char* username, const double amount) {
 
 double getUserAvailableCoins(unsigned id) {
 	ifstream blocksFile("blocks.dat", std::ios::binary);
+	double userCoins;
+
+	TransactionBlock block;
+	char var;
+	while (blocksFile >> var) {
+		blocksFile.read(reinterpret_cast<char*>(&block), sizeof(TransactionBlock));
+
+		for (size_t i = 0; i < block.validTransactions; i++)
+		{
+			if (block.transactions[i].receiver == id)
+			{
+				userCoins += block.transactions[i].coins;
+			}
+			else if (block.transactions[i].sender == id) {
+				userCoins -= block.transactions[i].coins;
+			}
+		}
+	}
+
+
 
 	return 0;
 }
@@ -233,36 +280,12 @@ int getCountUsers()
 		return -1;
 	}
 	readFile.seekg(0, std::ios::end);
-	int usersCount = readFile.tellg() / sizeof(User);
+	unsigned usersCount = readFile.tellg() / sizeof(User);
 
 	readFile.close();
 
 	return usersCount;
 }
-
-//User* loadUsers() {
-//	int usersCount = countUsers();
-//	ifstream readFile(USERS_FILE_NAME, std::ios::binary);
-//
-//	User* users = new User[usersCount];
-//
-//	if (usersCount != -1)
-//	{
-//		for (int i = 0; i < usersCount; i++)
-//		{
-//			User initUser;
-//			readFile.read(reinterpret_cast<char*>(&initUser), sizeof(User));
-//			users[i] = initUser;
-//			cout << loadedUsers[i].id << endl;
-//			cout << loadedUsers[i].name << endl;
-//		}
-//
-//	}
-//
-//	readFile.close();
-//
-//	return users;
-//}
 
 //bool findUserByName(char* username) {
 //	ifstream usersFile("users.bat", std::ios::binary);
@@ -277,9 +300,17 @@ int getCountUsers()
 //	}
 //}
 	
-//User findUserById(unsigned id) {
-//
-//}
+User findUserById(unsigned id) {
+	int countUsers = getCountUsers();
+	ifstream usersFile("users.bat", std::ios::binary);
+	User user;
+
+	for (size_t i = 0; i < countUsers; i++) {
+		usersFile.read(reinterpret_cast<char*>(&user), sizeof(User));
+
+
+	}
+}
 
 void removeUser(char* username) {
 	ifstream readFile(USERS_FILE_NAME, std::ios::binary);
@@ -301,8 +332,7 @@ void removeUser(char* username) {
 				isUserFound = true;
 			}
 		}
-
-		// Delete users.bat file and renaming the initial file to users.bat
+		// Delete "users.bat" file and renaming the initial file to "users.bat"
 		if (isUserFound) {
 			readFile.close();
 			writeFile.close();
@@ -316,8 +346,18 @@ void removeUser(char* username) {
 				cout << "Error renaming!" << endl;
 				return;
 			}
+
+			cout << "User successfully deleted!" << endl;
 		}
 		else {
+			readFile.close();
+			writeFile.close();
+
+			if (remove(INITUSERS_FILE_NAME)) {
+				cout << "Error deleting!" << endl;
+				return;
+			}
+
 			cout << "User does not exist!" << endl;
 		}
 	}
@@ -344,9 +384,9 @@ void validateAmount(double& amount) {
 void validateName(char* name) {
 	while (true)
 	{
-		if (strlen(name) < 4 || strlen(name) > 126)
+		if (strlen(name) < 4 || strlen(name) > 127)
 		{
-			cout << "Invalid input! Name length must be more between 4 and 126 characters!" << endl;
+			cout << "Invalid input! Name length must be between 4 and 127 characters!" << endl;
 			cin >> name;
 			continue;
 		}
