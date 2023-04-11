@@ -55,12 +55,12 @@ public:
 
         firstName = nullptr;
         lastName = nullptr;
-        
+
         gender = Gender::Unknown;
         yearOfBirth = 0;
     }
 
-    char* getFirstName() const{
+    char* getFirstName() const {
         return this->firstName;
     }
     char* getLastName() const {
@@ -85,8 +85,11 @@ private:
     short yearOfBirth;
 
     void copy(const Person& person) {
-        this->firstName = person.firstName;
-        this->lastName = person.lastName;
+        this->firstName = new char[strlen(person.firstName) + 1];
+        this->lastName = new char[strlen(person.lastName) + 1];
+        strcpy(this->firstName, person.firstName);
+        strcpy(this->lastName, person.lastName);
+        
         this->gender = person.gender;
         this->yearOfBirth = person.yearOfBirth;
     }
@@ -122,7 +125,7 @@ public:
             cout << INVALID_READ_FILE_MSG << endl;
             return;
         }
-        
+
         // Easier if carsCount is being passed through parameter
         //int carsCount = getCarsCount(carsFile);
 
@@ -155,13 +158,13 @@ public:
         for (size_t i = 0; i < carsCount; i++) {
             carsFile << "Car model: " << cars[i].model << " | Car owner: " << cars[i].owner->getFirstName() << " " << cars[i].owner->getLastName() << " | Car year of registration: " << cars[i].yearOfRegistration << endl;
         }
-        
+
         carsFile.close();
     }
 
     /*
         No time left.. The idea is to sort the cars alphabetically, then strcmp(two of them),
-        if it returns 0, then they are equal so we increment the counter by one, 
+        if it returns 0, then they are equal so we increment the counter by one,
         if it returns != 0, then we have another car so we set the counter to zero and check if (count > topModelCount),
         then at the end we see what is the car that is the most often used
     */
@@ -186,8 +189,7 @@ public:
             int topModelCount = 0;
             int count;
 
-            for (size_t i = 0; i < carsCount; i++)
-            {
+            for (size_t i = 0; i < carsCount; i++) {
 
             }
         }
@@ -198,43 +200,38 @@ private:
     Person* owner;
     short yearOfRegistration;
 
-   /*
-       int getCarsCount(ifstream& carsFile) const {
-            int curr = 0;
-            carsFile.seekg(0, std::ios::end);
-            curr = carsFile.tellg();
-            carsFile.seekg(0, std::ios::beg);
+    /*
+        int getCarsCount(ifstream& carsFile) const {
+             int curr = 0;
+             carsFile.seekg(0, std::ios::end);
+             curr = carsFile.tellg();
+             carsFile.seekg(0, std::ios::beg);
 
-            return curr / sizeof(Car);
-        }
-    */
+             return curr / sizeof(Car);
+         }
+     */
 };
 
 
-int main()
-{
+int main() {
     Person newPerson("Gosho", "Petrov", Gender::Male, 2000);
-    // Testing
-    /*
-        cout << newPerson.getFirstName() << endl;
-        cout << newPerson.getLastName() << endl;
-        cout << newPerson.getGender() << endl;
-        cout << newPerson.getYearOfBirth() << endl;
-    */
+    cout << newPerson.getFirstName() << endl;
+    cout << newPerson.getLastName() << endl;
+    cout << newPerson.getGender() << endl;
+    cout << newPerson.getYearOfBirth() << endl;
 
-    Person anotherPerson("Peturka", "Ivanova", Gender::Female, 2003);
-    // Testing
-    /*
-        cout << anotherPerson.getFirstName() << endl;
-        cout << anotherPerson.getLastName() << endl;
-        cout << anotherPerson.getGender() << endl;
-        cout << anotherPerson.getYearOfBirth() << endl;
-    */
+    Person anotherPerson;
+    anotherPerson = newPerson;
 
-    Car cars[2];
+    cout << anotherPerson.getFirstName() << endl;
+    cout << anotherPerson.getLastName() << endl;
+    cout << anotherPerson.getGender() << endl;
+    cout << anotherPerson.getYearOfBirth() << endl;
+
+    /*Car cars[2];
     cars[0] = Car("Mercedes", newPerson, 2000);
     cars[1] = Car("BMW", anotherPerson, 2003);
 
     cars[0].writeToFile(cars, 2);
-    cars[0].readFromFile(2);
+    cars[0].readFromFile(2);*/
 }
