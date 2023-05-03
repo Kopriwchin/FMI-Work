@@ -1,59 +1,33 @@
 #include <iostream>
 #include <string>
+#include <vector>
+#include <unordered_map>
 
 using std::cin;
 using std::cout;
 using std::endl;
-using std::string;
+using std::vector;
+using std::unordered_map;
 
-int romanToInt(string input) {
-    int result = 0;
-    int number = 0;
-    int previous = 0;
+// Time compexity - O(n) solution
+vector<int> twoSum(vector<int>& nums, int target) {
+    unordered_map<int, int> map;
 
-    for (int i = input.length() - 1; i >= 0; i--) {
-        switch(input[i])
+    for (int i = 0; i < nums.size(); i++) {
+        if (map.find(target - nums[i]) == map.end())
+            map[nums[i]] = i;
+        else
         {
-            case 'I':
-                number = 1;
-                break;
-            case 'V':
-                number = 5;
-                break;
-            case 'X':
-                number = 10;
-                break;
-            case 'L':
-                number = 50;
-                break;
-            case 'C':
-                number = 100;
-                break;
-            case 'D':
-                number = 500;
-                break;
-            case 'M':
-                number = 1000;
-                break;
+            cout << map[target - nums[i]] << ',' << i;
+            return { map[target - nums[i]], i };
         }
-
-        if (previous > number)
-        {
-            result -= number;
-        }
-        else {
-            result += number;
-        }
-
-        previous = number;
     }
 
-    return result;
+    return { -1, -1 };
 }
 
 int main()
 {
-    cout << romanToInt("MCMXCIV") << endl;
-    cout << romanToInt("LVIII") << endl;
-    cout << romanToInt("III") << endl;
+	vector<int> nums = { 2,5,8,7 };
+	twoSum(nums, 9); 
 }
