@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{d52859fa-df0e-4e76-8237-237b63434571}</ProjectGuid>
-    <RootNamespace>OOPCoin</RootNamespace>
+    <ProjectGuid>{71e0423f-1384-451f-989c-95891a0cc81f}</ProjectGuid>
+    <RootNamespace>CSVProject</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -127,11 +127,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CSVReader.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Constants.h" />
-    <ClInclude Include="Validation.h" />
+    <ClInclude Include="Constants.hpp" />
+    <ClInclude Include="CSVDataType.hpp" />
+    <ClInclude Include="CSVReader.hpp" />
+    <ClInclude Include="CSVSort.hpp" />
+    <ClInclude Include="CSVWriter.hpp" />
+    <ClInclude Include="Date.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
