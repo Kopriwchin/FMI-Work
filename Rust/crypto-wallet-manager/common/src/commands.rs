@@ -9,6 +9,7 @@ pub enum ClientCommand {
     ListOfferings,
     Buy { offering: String, money: f64 },
     Sell { offering: String },
+    GetProfile,
     GetWalletSummary,
     GetWalletOverallSummary,
 }
