@@ -119,7 +119,6 @@ pub async fn handle_client(
                 } else {
                     let user_id: String = session.user_id.clone().unwrap();
 
-                    // amount = USD amount to spend
                     match trading::buy(&state, &user_id, &asset_id, amount).await {
                         Ok(_) => ServerResponse::Message("Buy successful".into()),
                         Err(e) => ServerResponse::Error(e),

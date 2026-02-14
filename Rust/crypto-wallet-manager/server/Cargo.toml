@@ -15,7 +15,6 @@ thiserror = "1"
 reqwest = { version = "0.11", features = ["json"] }
 dotenv = "0.15"
 rust_decimal = "1"
-rust_decimal_macros = "1"
 chrono = "0.4.43"
 
 sqlx = { version = "0.7", features = [
@@ -25,4 +24,8 @@ sqlx = { version = "0.7", features = [
     "uuid",
     "chrono"
 ] }
-axum = "0.8.8"
+async-trait = "0.1"
+
+
+[dev-dependencies]
+rust_decimal_macros = "1"

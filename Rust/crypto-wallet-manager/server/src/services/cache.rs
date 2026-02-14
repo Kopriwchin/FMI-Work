@@ -121,7 +121,7 @@ async fn read_cache(
     let mut result: Vec<(String, String, Decimal)> = Vec::new();
 
     for row in rows {
-        let asset_id: String = row.asset_id; // NOT NULL (PRIMARY KEY)
+        let asset_id: String = row.asset_id;
         let name: String = row.name.unwrap_or_default();
         let price_str: String = row.price_usd.ok_or_else(|| "Missing price_usd".to_string())?;
 

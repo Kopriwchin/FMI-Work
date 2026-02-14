@@ -2,7 +2,6 @@ use rust_decimal::Decimal;
 use std::str::FromStr;
 use uuid::Uuid;
 use sqlx::{Sqlite, Transaction};
-
 use crate::state::AppState;
 use common::commands::{HoldingDto, TransactionDto, WalletSummaryDto};
 
@@ -334,7 +333,6 @@ pub async fn sell_all(
     let new_balance: Decimal = balance + usd_value;
     update_wallet_balance(&mut tx, user_id, new_balance).await?;
 
-    // 4) Insert transaction
     insert_transaction(&mut tx, user_id, asset_id, qty, "SELL").await?;
 
     tx.commit().await.map_err(|_| "Commit failed".to_string())?;

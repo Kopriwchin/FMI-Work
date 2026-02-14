@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use rust_decimal::Decimal;
 use crate::models::offering::Offering;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum ClientCommand {
     Register { username: String, password: String},
     Login { username: String, password: String},

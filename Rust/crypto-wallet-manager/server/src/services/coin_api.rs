@@ -1,3 +1,4 @@
+use async_trait::async_trait;
 use serde::Deserialize;
 use reqwest::Client;
 
@@ -9,9 +10,44 @@ pub struct Asset {
     pub type_is_crypto: Option<u8>,
 }
 
+#[async_trait]
+pub trait CoinApi: Send + Sync {
+    async fn get_asset(&self, asset_id: &str) -> Result<Asset, reqwest::Error>;
+    async fn get_assets(&self) -> Result<Vec<Asset>, reqwest::Error>;
+}
+
 pub struct CoinApiService {
     client: Client,
     api_key: String,
+}
+
+#[async_trait]
+impl CoinApi for CoinApiService {
+    async fn get_asset(&self, asset_id: &str) -> Result<Asset, reqwest::Error> {
+        let url: String = format!("https://rest.coinapi.io/v1/assets/{}", asset_id);
+
+        let response = self.client
+            .get(url)
+            .header("X-CoinAPI-Key", &self.api_key)
+            .send()
+            .await?
+            .json::<Vec<Asset>>()
+            .await?;
+
+        Ok(response.into_iter().next().unwrap())
+    }
+
+    async fn get_assets(&self) -> Result<Vec<Asset>, reqwest::Error> {
+        let response = self.client
+            .get("https://rest.coinapi.io/v1/assets")
+            .header("X-CoinAPI-Key", &self.api_key)
+            .send()
+            .await?
+            .json::<Vec<Asset>>()
+            .await?;
+
+        Ok(response)
+    }
 }
 
 impl CoinApiService {
@@ -45,8 +81,6 @@ impl CoinApiService {
         Ok(response.into_iter().next().unwrap())
     }
 
-    /// Live call: GET /v1/assets
-    /// NOTE: caching is handled in `cache.rs` (DB cache), not here.
     pub async fn get_assets(
         &self,
     ) -> Result<Vec<Asset>, reqwest::Error> {
