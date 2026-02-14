@@ -1,3 +1,4 @@
+use std::str::FromStr;
 use std::sync::Arc;
 use common::commands::{ClientCommand, ServerResponse};
 
@@ -162,6 +163,31 @@ pub async fn handle_client(
                         Ok(list) => ServerResponse::Transactions(list),
                         Err(e) => ServerResponse::Error(e),
                     }
+                }
+            }
+
+            ClientCommand::GetPrice { asset_id } => {
+                match state.coin_service.get_asset(&asset_id).await {
+                    Ok(asset) => {
+                        if asset.type_is_crypto != Some(1) {
+                            ServerResponse::Error("Not a crypto asset".into())
+                        } else {
+                            match asset.price_usd {
+                                Some(price_f64) => {
+                                    let price =
+                                        rust_decimal::Decimal::from_str(&price_f64.to_string())
+                                            .map_err(|_| "Invalid price format")?;
+
+                                    ServerResponse::Price(Offering {
+                                        asset_id: asset.asset_id,
+                                        price_usd: price,
+                                    })
+                                }
+                                None => ServerResponse::Error("No price available".into()),
+                            }
+                        }
+                    }
+                    Err(_) => ServerResponse::Error("Failed to fetch price".into()),
                 }
             }
         };

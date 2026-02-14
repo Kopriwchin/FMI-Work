@@ -43,7 +43,7 @@ async fn should_refresh_cache(
         .map_err(|_| "Cache check failed".to_string())?;
 
     Ok(match row.last_updated {
-        Some(ts) => now - ts > CACHE_SECONDS,
+        Some(ts) => now - (ts as i64) > CACHE_SECONDS,
         None => true,
     })
 }

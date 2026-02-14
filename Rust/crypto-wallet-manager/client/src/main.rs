@@ -14,11 +14,11 @@ Available commands:
   help
   register <username> <password>
   login <username> <password>
-  profile
   offerings
+  price <asset_id>             (real-time from CoinAPI)
   deposit <amount_usd>
   buy <asset_id> <amount_usd>
-  sell <asset_id>             (sell all of this asset)
+  sell <asset_id>              (sell all of this asset)
   wallet
   portfolio
   tx <page> <page_size>
@@ -27,14 +27,16 @@ Available commands:
 Examples:
   register alice pass123
   login alice pass123
-  deposit 1000
   offerings
+  price BTC
+  deposit 1000
   buy BTC 200
   wallet
   tx 1 20
 "#
     );
 }
+
 
 fn require_login(logged_in_user_id: &Option<String>) -> bool {
     if logged_in_user_id.is_none() {
@@ -61,16 +63,21 @@ fn format_response(resp: &ServerResponse) {
     match resp {
         ServerResponse::Message(msg) => println!("{}", msg),
         ServerResponse::Error(msg) => println!("Error: {}", msg),
+
         ServerResponse::Offerings(list) => {
             if list.is_empty() {
                 println!("No offerings.");
                 return;
             }
-
             for o in list {
                 println!("{} - ${}", o.asset_id, o.price_usd);
             }
         }
+
+        ServerResponse::Price(p) => {
+            println!("{} - ${}", p.asset_id, p.price_usd);
+        }
+
         ServerResponse::WalletSummary(summary) => {
             println!("Balance (USD): {}", summary.balance_usd);
 
@@ -84,6 +91,7 @@ fn format_response(resp: &ServerResponse) {
                 println!("  {}: {}", h.asset_id, h.amount);
             }
         }
+
         ServerResponse::Transactions(list) => {
             if list.is_empty() {
                 println!("No transactions.");
@@ -99,6 +107,7 @@ fn format_response(resp: &ServerResponse) {
         }
     }
 }
+
 
 fn build_command(
     input: &str,
@@ -137,11 +146,13 @@ fn build_command(
             }))
         }
 
-        "profile" => {
-            if !require_login(logged_in) {
-                return Ok(None);
+        "price" => {
+            if parts.len() != 2 {
+                return Err("Usage: price <asset_id>".to_string());
             }
-            Ok(Some(ClientCommand::GetProfile))
+            Ok(Some(ClientCommand::GetPrice {
+                asset_id: parts[1].to_string(),
+            }))
         }
 
         "offerings" => Ok(Some(ClientCommand::ListOfferings)),
@@ -216,9 +227,11 @@ fn build_command(
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+
     let mut client: TcpClient = TcpClient::connect("127.0.0.1:8080").await?;
 
     let mut logged_in_user_id: Option<String> = None;
+    let mut logged_in_username: Option<String> = None;
     let mut prompt_prefix: String = "wallet> ".to_string();
 
     print_help();
@@ -257,18 +270,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         match &resp {
             ServerResponse::Message(msg) => {
                 if msg.to_lowercase().contains("logged in") {
-                    let profile_resp: ServerResponse =
-                        client.send(ClientCommand::GetProfile).await?;
-                    if let ServerResponse::Message(profile_msg) = &profile_resp {
-                        if let Some(id) = profile_msg.split(':').nth(1) {
-                            let user_id: String = id.trim().to_string();
-                            if !user_id.is_empty() {
-                                logged_in_user_id = Some(user_id.clone());
-                                prompt_prefix = format!("wallet({})> ", user_id);
-                            }
-                        }
+                    let parts: Vec<&str> = input.split_whitespace().collect();
+                    if parts.len() >= 2 {
+                        let username: String = parts[1].to_string();
+
+                        logged_in_user_id = Some("ok".to_string());
+                        logged_in_username = Some(username.clone());
+                        prompt_prefix = format!("wallet({})> ", username);
                     }
-                    format_response(&profile_resp);
                 }
             }
             _ => {}
