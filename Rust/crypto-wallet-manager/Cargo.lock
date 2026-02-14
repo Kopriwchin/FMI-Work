@@ -245,6 +245,9 @@ name = "client"
 version = "0.1.0"
 dependencies = [
  "common",
+ "rust_decimal",
+ "serde",
+ "serde_json",
  "tokio",
 ]
 
