@@ -1,19 +1,17 @@
-use std::collections::HashMap;
-use std::sync::Arc;
-
-use common::models::User;
+use std::sync::{Arc};
+use sqlx::SqlitePool;
 use crate::services::coin_api::CoinApiService;
 
 pub struct AppState {
-    pub users: HashMap<String, User>,
+    pub db: SqlitePool,
     pub coin_service: Arc<CoinApiService>,
 }
 
 impl AppState {
-    pub fn new(coin_service: Arc<CoinApiService>, users: HashMap<String, User>) -> Self {
-        Self {
-            users,
-            coin_service,
-        }
+    pub fn new(
+        db: SqlitePool,
+        coin_service: Arc<CoinApiService>,
+    ) -> Self {
+        Self { db, coin_service }
     }
 }

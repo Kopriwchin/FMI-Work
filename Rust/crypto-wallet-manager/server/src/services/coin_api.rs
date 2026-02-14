@@ -1,4 +1,4 @@
-use serde::Deserialize;
+use serde::{Deserialize};
 use reqwest::Client;
 use tokio::sync::Mutex;
 
