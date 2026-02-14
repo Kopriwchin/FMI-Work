@@ -1,4 +1,4 @@
-mod logger;
+pub mod logger;
 
 use thiserror::Error;
 

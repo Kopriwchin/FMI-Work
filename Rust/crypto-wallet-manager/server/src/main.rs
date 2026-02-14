@@ -10,9 +10,8 @@ use dotenv::dotenv;
 use std::env;
 use tokio::net::TcpListener;
 
-use sqlx::sqlite::{SqlitePool, SqlitePoolOptions};
+use sqlx::sqlite::{SqlitePool};
 use state::AppState;
-use db::user_repo;
 use db::init_db;
 
 use crate::services::coin_api::CoinApiService;
@@ -26,12 +25,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api_key: String =
         env::var("COIN_API_KEY")
             .expect("API KEY missing");
-
-    let db: sqlx::SqlitePool =
-        SqlitePoolOptions::new()
-            .max_connections(5)
-            .connect("sqlite:wallet.db")
-            .await?;
 
     let coin_service = Arc::new(CoinApiService::new(api_key));
     let state = Arc::new(AppState::new(db, coin_service));

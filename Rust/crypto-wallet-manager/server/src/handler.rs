@@ -1,13 +1,10 @@
-use crate::db::user_repo;
-use crate::services::wallet;
-
 use std::sync::Arc;
-use rust_decimal::Decimal;
 use common::commands::{ClientCommand, ServerResponse};
 
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::net::TcpStream;
 use common::models::offering::Offering;
+use crate::services::{cache, trading};
 use crate::auth::service;
 use crate::auth::session::Session;
 use crate::state::AppState;
@@ -50,14 +47,12 @@ pub async fn handle_client(
             }
 
             ClientCommand::Login { username, password } => {
-                match service::login(&state, &username, &password).await
-                {
+                match service::login(&state, &username, &password).await {
                     Ok(user) => {
                         session.user_id = Some(user.id);
                         ServerResponse::Message("Logged in".into())
                     }
-                    Err(_) =>
-                        ServerResponse::Error("Invalid credentials".into()),
+                    Err(_) => ServerResponse::Error("Invalid credentials".into()),
                 }
             }
 
@@ -73,51 +68,103 @@ pub async fn handle_client(
             }
 
             ClientCommand::ListOfferings => {
-                match state.coin_service.get_assets().await {
+                match cache::get_cached_assets(&state).await {
+
                     Ok(assets) => {
+
                         let offerings: Vec<Offering> = assets
-                            .iter()
-                            .map(|a| Offering {
-                                asset_id: a.asset_id.clone(),
-                                price_usd: Decimal::try_from(a.price_usd.unwrap_or(0.0)).unwrap(),
+                            .into_iter()
+                            .map(|(asset_id, _name, price)| Offering {
+                                asset_id,
+                                price_usd: price,
                             })
                             .collect();
 
                         ServerResponse::Offerings(offerings)
                     }
 
-                    Err(_) => ServerResponse::Error(
-                        "Failed to fetch crypto data".to_string()
-                    ),
+                    Err(e) => ServerResponse::Error(e),
+                }
+            }
+
+            ClientCommand::GetWalletSummary => {
+                if !session.is_authenticated() {
+                    ServerResponse::Error("Authentication required".into())
+                } else {
+                    let user_id: String = session.user_id.clone().unwrap();
+
+                    match trading::wallet_summary(&state, &user_id).await {
+                        Ok(summary) => ServerResponse::WalletSummary(summary),
+                        Err(e) => ServerResponse::Error(e),
+                    }
                 }
             }
 
             ClientCommand::Deposit { amount } => {
-                let balance_string = user.wallet.balance.to_string();
+                if !session.is_authenticated() {
+                    ServerResponse::Error("Authentication required".into())
+                } else {
+                    let user_id: String = session.user_id.clone().unwrap();
 
-                sqlx::query!(
-                        "INSERT INTO wallets (user_id, balance)
-                         VALUES (?1, ?2)",
-                    user.id,
-                    balance_string
-                    .execute(db)
-                    .await?;
-
-
-                let user = session
-                    .user_mut(&mut users)
-                    .ok_or("Not authenticated")?;
-
-                wallet::deposit(user, amount);
-
-                user_repo::save_users(&users).ok();
-
-                ServerResponse::Message("Deposit successful".into())
+                    match trading::deposit(&state, &user_id, amount).await {
+                        Ok(_) => ServerResponse::Message("Deposit successful".into()),
+                        Err(e) => ServerResponse::Error(e),
+                    }
+                }
             }
 
+            ClientCommand::Buy { asset_id, amount } => {
+                if !session.is_authenticated() {
+                    ServerResponse::Error("Authentication required".into())
+                } else {
+                    let user_id: String = session.user_id.clone().unwrap();
 
+                    // amount = USD amount to spend
+                    match trading::buy(&state, &user_id, &asset_id, amount).await {
+                        Ok(_) => ServerResponse::Message("Buy successful".into()),
+                        Err(e) => ServerResponse::Error(e),
+                    }
+                }
+            }
 
-            _ => ServerResponse::Error("Command not implemented".to_string()),
+            ClientCommand::Sell { asset_id } => {
+                if !session.is_authenticated() {
+                    ServerResponse::Error("Authentication required".into())
+                } else {
+                    let user_id: String = session.user_id.clone().unwrap();
+
+                    match trading::sell_all(&state, &user_id, &asset_id).await {
+                        Ok(_) => ServerResponse::Message("Sell successful".into()),
+                        Err(e) => ServerResponse::Error(e),
+                    }
+                }
+            }
+
+            ClientCommand::GetWalletOverallSummary => {
+                if !session.is_authenticated() {
+                    ServerResponse::Error("Authentication required".into())
+                } else {
+                    let user_id: String = session.user_id.clone().unwrap();
+
+                    match trading::portfolio_value(&state, &user_id).await {
+                        Ok(total) => ServerResponse::Message(format!("Total portfolio value (USD): {}", total)),
+                        Err(e) => ServerResponse::Error(e),
+                    }
+                }
+            }
+
+            ClientCommand::GetTransactionHistory { page, page_size } => {
+                if !session.is_authenticated() {
+                    ServerResponse::Error("Authentication required".into())
+                } else {
+                    let user_id: String = session.user_id.clone().unwrap();
+
+                    match trading::transaction_history(&state, &user_id, page, page_size).await {
+                        Ok(list) => ServerResponse::Transactions(list),
+                        Err(e) => ServerResponse::Error(e),
+                    }
+                }
+            }
         };
 
         let response_json: String = serde_json::to_string(&response)?;

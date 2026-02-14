@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use rust_decimal::Decimal;
-
 use crate::models::offering::Offering;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -15,6 +13,19 @@ pub enum ClientCommand {
     GetProfile,
     GetWalletSummary,
     GetWalletOverallSummary,
+    GetTransactionHistory { page: i64, page_size: i64 },
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct HoldingDto {
+    pub asset_id: String,
+    pub amount: Decimal,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct WalletSummaryDto {
+    pub balance_usd: Decimal,
+    pub holdings: Vec<HoldingDto>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -22,8 +33,15 @@ pub enum ServerResponse {
     Message(String),
     Error(String),
     Offerings(Vec<Offering>),
-    WalletSummary {
-        usd_balance: f64,
-        investments: HashMap<String, f64>
-    }
+    WalletSummary(WalletSummaryDto),
+    Transactions(Vec<TransactionDto>),
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TransactionDto {
+    pub id: String,
+    pub asset_id: String,
+    pub amount: Decimal,
+    pub tx_type: String,
+    pub created_at: String,
 }

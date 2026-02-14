@@ -1,3 +1,3 @@
 pub mod coin_api;
-pub mod wallet;
-mod trading;
+pub mod trading;
+pub mod cache;

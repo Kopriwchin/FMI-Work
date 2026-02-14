@@ -1,9 +1,5 @@
-use serde::{Deserialize};
+use serde::Deserialize;
 use reqwest::Client;
-use tokio::sync::Mutex;
-
-use std::sync::Arc;
-use std::time::{Instant, Duration};
 
 #[derive(Deserialize, Clone)]
 pub struct Asset {
@@ -13,21 +9,9 @@ pub struct Asset {
     pub type_is_crypto: Option<u8>,
 }
 
-pub struct AssetCache {
-    pub assets: Vec<Asset>,
-    pub last_update: Instant,
-}
-
-impl AssetCache {
-    pub fn is_valid(&self) -> bool {
-        self.last_update.elapsed() < Duration::from_secs(1800) // 30min
-    }
-}
-
 pub struct CoinApiService {
     client: Client,
     api_key: String,
-    cache: Arc<Mutex<Option<AssetCache>>>,
 }
 
 impl CoinApiService {
@@ -35,18 +19,37 @@ impl CoinApiService {
         Self {
             client: Client::new(),
             api_key,
-            cache: Arc::new(Mutex::new(None)),
         }
     }
 
-    pub async fn get_assets(&self) -> Result<Vec<Asset>, reqwest::Error> {
-        let mut cache_guard = self.cache.lock().await;
+    /// Live call: GET /v1/assets/{asset_id}
+    pub async fn get_asset(
+        &self,
+        asset_id: &str,
+    ) -> Result<Asset, reqwest::Error> {
 
-        if let Some(cache) = cache_guard.as_ref() {
-            if cache.is_valid() {
-                return Ok(cache.assets.clone());
-            }
-        }
+        let url: String = format!(
+            "https://rest.coinapi.io/v1/assets/{}",
+            asset_id
+        );
+
+        let response = self.client
+            .get(url)
+            .header("X-CoinAPI-Key", &self.api_key)
+            .send()
+            .await?
+            .json::<Vec<Asset>>()
+            .await?;
+
+        // CoinAPI returns array with 0 or 1 elements for this endpoint
+        Ok(response.into_iter().next().unwrap())
+    }
+
+    /// Live call: GET /v1/assets
+    /// NOTE: caching is handled in `cache.rs` (DB cache), not here.
+    pub async fn get_assets(
+        &self,
+    ) -> Result<Vec<Asset>, reqwest::Error> {
 
         let response = self.client
             .get("https://rest.coinapi.io/v1/assets")
@@ -56,18 +59,6 @@ impl CoinApiService {
             .json::<Vec<Asset>>()
             .await?;
 
-        let cryptos: Vec<Asset> = response
-            .into_iter()
-            .filter(|a| a.type_is_crypto == Some(1))
-            .take(100)
-            .collect();
-
-        *cache_guard = Some(AssetCache {
-            assets: cryptos.clone(),
-            last_update: Instant::now(),
-        });
-
-        Ok(cryptos)
+        Ok(response)
     }
 }
-
